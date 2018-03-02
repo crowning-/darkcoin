@@ -36,6 +36,7 @@ public:
 
     void setClientModel(ClientModel *clientModel);
     void setWalletModel(WalletModel *walletModel);
+    void ShowQRCode(std::string strAlias);
     void StartAlias(std::string strAlias);
     void StartAll(std::string strCommand = "start-all");
 
@@ -73,5 +74,6 @@ private Q_SLOTS:
     void on_startMissingButton_clicked();
     void on_tableWidgetMyMasternodes_itemSelectionChanged();
     void on_UpdateButton_clicked();
+    void on_QRButton_clicked();
 };
 #endif // MASTERNODELIST_H

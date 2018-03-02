@@ -8,6 +8,7 @@
 #include "masternode-sync.h"
 #include "masternodeconfig.h"
 #include "masternodeman.h"
+#include "qrdialog.h"
 #include "sync.h"
 #include "wallet/wallet.h"
 #include "walletmodel.h"
@@ -424,4 +425,49 @@ void MasternodeList::on_tableWidgetMyMasternodes_itemSelectionChanged()
 void MasternodeList::on_UpdateButton_clicked()
 {
     updateMyNodeList(true);
+}
+
+void MasternodeList::on_QRButton_clicked()
+{
+    std::string strAlias;
+    {
+        LOCK(cs_mymnlist);
+        // Find selected node alias
+        QItemSelectionModel* selectionModel = ui->tableWidgetMyMasternodes->selectionModel();
+        QModelIndexList selected = selectionModel->selectedRows();
+
+        if(selected.count() == 0) return;
+
+        QModelIndex index = selected.at(0);
+        int nSelectedRow = index.row();
+        strAlias = ui->tableWidgetMyMasternodes->item(nSelectedRow, 0)->text().toStdString();
+    }
+
+    ShowQRCode(strAlias);
+}
+
+void MasternodeList::ShowQRCode(std::string strAlias) {
+
+    if(!walletModel || !walletModel->getOptionsModel())
+        return;
+
+    // Get private key for this alias
+    std::string strMNPrivKey = "";
+
+    BOOST_FOREACH(CMasternodeConfig::CMasternodeEntry mne, masternodeConfig.getEntries()) {
+        if (strAlias != mne.getAlias()) {
+            continue;
+        }
+        else {
+            strMNPrivKey = mne.getPrivKey();
+            break;
+        }
+    }
+
+    // Open QR dialog
+    QRDialog *dialog = new QRDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModel(walletModel->getOptionsModel());
+    dialog->setInfo(strMNPrivKey, strAlias);
+    dialog->show();
 }
